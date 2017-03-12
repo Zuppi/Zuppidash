@@ -20,8 +20,6 @@ namespace ZuppidashHost
             wrapper.SessionInfoUpdated += OnSessionInfoUpdated;
             wrapper.Connected += OnWrapperConnected;
             wrapper.Disconnected += OnWrapperDisconnected;
-
-            dataParser = new DataParser();
         }
 
         public void Open(int updateFrequency)
@@ -42,19 +40,46 @@ namespace ZuppidashHost
 
         private void OnTelemetryUpdated(object sender, SdkWrapper.TelemetryUpdatedEventArgs e)
         {
-            dataParser.ParseTelemetry(e);
             
+            float TCValue = 99;
+            try
+            {
+                var tcVar = wrapper.GetTelemetryValue<float>("dcTractionControl");
+                TCValue = tcVar.Value;
+                if (TCValue < 0)
+                {
+                    TCValue = 99;
+                }
+            }
+            catch{}
+
+            float BBValue = 99;
+            try
+            {
+                var bbVar = wrapper.GetTelemetryValue<float>("dcBrakeBias");
+                BBValue = bbVar.Value;
+                if (BBValue < 10)
+                {
+                    BBValue = 99;
+                }
+            }
+            catch {}
+
+            dataParser.ParseTelemetry(e, (int)TCValue, Math.Round(BBValue, 2));
+
             displayConnection.SendMessage(dataParser.GetDisplayString(), dataParser.GetLedAmount(), dataParser.GetDotBin());
         }
 
         private void OnWrapperConnected(object sender, EventArgs e)
         {
             hostWindow.IracingStarted();
+            dataParser = new DataParser();
         }
 
         private void OnWrapperDisconnected(object sender, EventArgs e)
         {
             hostWindow.IracingStopped();
+            dataParser = null;
         }
     }
 }

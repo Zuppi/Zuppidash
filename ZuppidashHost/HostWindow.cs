@@ -93,13 +93,9 @@ namespace ZuppidashHost
             return "  " + DateTime.Now.ToString("HHmm") + "|0|16";
         }
 
-        public void RedirectCommand(Enums.CommandTargets target, Enums.Commands command)
-        {
-
-        }
-
         private void HostWindow_FormClosing(Object sender, FormClosingEventArgs e)
         {
+            notifyIcon.Visible = false;
             notifyIcon.Dispose();
             displayConnection.Close();
             iracingConnection.Close();
@@ -135,6 +131,7 @@ namespace ZuppidashHost
             else if (FormWindowState.Normal == this.WindowState)
             {
                 notifyIcon.Visible = false;
+                this.Activate();
             }
         }
 
@@ -145,6 +142,7 @@ namespace ZuppidashHost
                 allowVisible = true;
                 this.Show();
                 this.WindowState = FormWindowState.Normal;
+                this.BringToFront();
             }        
         }
 
